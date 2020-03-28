@@ -11,26 +11,24 @@ class Macowins{
         this.ventas = new LinkedList<>();
     }
 
-    private float gananciaDeVentas(List<Venta> unasVentas){
+    private double gananciaDeVentas(List<Venta> unasVentas){
         return ventas.map( venta -> venta.ganacia() ).sum();
     }
 
-    public float gananciaTotal(){
+    public double gananciaTotal(){
         return gananciaDeVentas(ventas);
     }
 
-    public float gananciaDeDia(Date unDia){
+    public double gananciaDelDia(Date unDia){
         return gananciaDeVentas(filtrarVentasPorFecha(unDia));
     }
 
-    private boolean hayStock(){
-        return true;
+    private boolean hayStock(int unaCantidad){
+        return stock>=unaCantidad;
     }
 
     public boolean validarVenta(Venta venta){
-        if(hayStock()){
-        return venta.cantidadDePrendas() >= stock;
-        }
+        return hayStock(venta.cantidadDePrendas());
     }
 
     public realizarVenta(Venta venta){
@@ -44,10 +42,11 @@ class Macowins{
 
 
 class Venta{
+    List<Prenda> prendas;
     int cuotas;
     TipoDePago tipoDePago;
     Date fecha;
-    List<Prenda> prendas;
+    
     
     Venta(TipoDePago unTipoDePago,int cuotas){
         this.tipoDePago = unTipoDePago;
@@ -56,7 +55,10 @@ class Venta{
         this.prendas = new List();
     }
 
-    private int cuotas(){
+    public int cantidadDePrendas(){
+        return ventas.size();    }
+
+    private int getCuotas(){
         return cuotas;
     }
 
@@ -75,16 +77,20 @@ class Venta{
     }
 
 
-    public float ganacia(){
+    public double ganacia(){
         return this.valorTotalPrendas() + tipoDePago.recargo(this);
     }
-    private float valorTotalDePrendas(){
+    private double valorTotalDePrendas(){
         return prendas.map(prenda -> prenda.precio()).sum();
     }
 
 class Prenda{
+    public static int prendaId=0;
     TipoDePrenda tipoDePrenda;
     Estado estado;
+    Prenda(){
+        this.id=Prenda.prendaId++;
+    }
 
     public precio(){
         return estado.modificacion(tipoDePrenda.precio());
@@ -92,53 +98,60 @@ class Prenda{
 }
 
 class TipoDePrenda{
-    public static int prendaId;
-    TipoDePrenda(float precio){
-        this.id=TipoDePrenda.prendaId;
-        TipoDePrenda.prendaId++;
+    public static int tipoPrendaId=0;
+    int id;
+    double precio;
+    TipoDePrenda(double precio){
+        this.id=TipoDePrenda.prendaId++;
         this.precio=precio;
     }
-    float precio;
-    public float precio(){
+    
+    public double precio(){
         return precio;
     }
 
-    public void cambiarPrecio(float unPrecio){
+    public void cambiarPrecio(double unPrecio){
         precio=unPrecio;
     }
 }
 
+interface Estado{
+    modificacion(double unPrecio);
+}
 
-class Nueva{
-    public modificacion(float unPrecio){
+class Nueva extends Estado{
+    public modificacion(double unPrecio){
         return unPrecio;
     }
 }
 
-class Promocion{
-    float valor;
+class Promocion extends Estado{
+    double valor;
     
-    public modificacion(float unPrecio){
+    public modificacion(double unPrecio){
         return unPrecio-valor;
     }
 }      
 
-class Liquidacion{
-    public modificacion(float unPrecio){
+class Liquidacion extends Estado{
+    public modificacion(double unPrecio){
         return unPrecio*0.5;
     }
 }
 
+interface TipoDePago{
+    recargo(Venta venta);
+}
 
-class Tarjeta{
-    float coeficiente;
-    public float recargo(Venta venta){
+class Tarjeta extends TipoDePago{
+    double coeficiente;
+    public double recargo(Venta venta){
         return venta.cuotas() * coeficiente + 0.01 * venta.valorTotalDePrendas();
     }
 }
 
-class Efectivo{
-    public float recargo(Venta venta){
+class Efectivo extends TipoDePago{
+    public double recargo(Venta venta){
         return 0;
     }
 }
@@ -157,8 +170,22 @@ REQUERIMIENTOS NO FUNCIONALES: No encontra ninguno
 
 
 Aclaraciones:
-/// Los pagos en Efectivo se anotan con cuota=1.
-/// Descarte la codificacion de todos los getters y setters que no se hacen uso.
+///Los pagos en Efectivo se anotan con cuota=1.
+
+///Descarte la codificacion de todos los getters y setters que no se hacen uso.
+
+///En la clase Macowins declare un metodo de hayStock que retorna siempre un true.
+ Se da por entender que si hay stock, se valida la venta. Lo deje permanentemente 
+ true ya que queria incluir esa consideracion al sistema y como no se tienen en cuenta dentro del contexto
+de la situacion asumi stock infinito.
+
+///Considere Macowins como una clase, de esta forma se podria asumir que cada clase Macowins es un
+local de Macowins. Capaz de momento no seria necesario pero a futuro probablemente seria conveniente
+si se implenta el sistema a una escala mayor.
+
+/// No tome en cuenta las transferencias bancarias ni las constaciones de los pagos en efectivo, no las
+considere como parte del sistema. Solamente las tome en cuenta para la ganancia neta de la empresa.
+
 
 
 */
