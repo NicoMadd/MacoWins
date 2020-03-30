@@ -1,3 +1,6 @@
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collector;
 
@@ -20,7 +23,7 @@ class Macowins{
         return gananciaDeVentas(ventas);
     }
 
-    public double gananciaDelDia(Date unDia){
+    public double gananciaDelDia(LocalDate unDia){
         return gananciaDeVentas(filtrarVentasPorFecha(unDia));
     }
 
@@ -32,34 +35,42 @@ class Macowins{
         return hayStock(venta.cantidadDePrendas());
     }
 
-    public realizarVenta(Venta venta){
+    public void realizarVenta(Venta venta){
         stock -= venta.cantidadDePrendas();
         ventas.add(venta);
     }
 
-    private List<Ventas> filtrarVentasPorFecha(Date unDia){
+    private List<Venta> filtrarVentasPorFecha(LocalDate unDia){
         return ventas.stream().filter( venta -> venta.fecha == unDia).collect(Collector.toList());
     }
+}
 
+interface TipoDePago{
+        double recargo(Venta venta);
+}
 
+interface Estado{
+    double modificacion(double unPrecio);
+}
+    
 class Venta{
     List<Prenda> prendas;
     int cuotas;
     TipoDePago tipoDePago;
-    Date fecha;
+    LocalDate fecha;
     
     
     Venta(TipoDePago unTipoDePago,int cuotas){
         this.tipoDePago = unTipoDePago;
         this.cuotas = cuotas;
         this.fecha = new LocalDate();
-        this.prendas = new List();
+        this.prendas = new LinkedList();
     }
 
     public int cantidadDePrendas(){
         return ventas.size();    }
 
-    private int getCuotas(){
+    public int getCuotas(){
         return cuotas;
     }
 
@@ -73,27 +84,33 @@ class Venta{
         }
     }
 
-    public Date getFecha(){
+    public LocalDate getFecha(){
         return fecha;
     }
 
 
     public double ganacia(){
-        return this.valorTotalPrendas() + tipoDePago.recargo(this);
+        return this.valorTotalDePrendas() + tipoDePago.recargo(this);
     }
-    private double valorTotalDePrendas(){
+    public double valorTotalDePrendas(){
         return prendas.stream().map(prenda -> prenda.precio()).collect(Collector.toList()).sum();
     }
+    
+}
+
 
 class Prenda{
     public static int prendaId=0;
     TipoDePrenda tipoDePrenda;
     Estado estado;
-    Prenda(){
+	private int id;
+    Prenda(Estado unEstado, TipoDeEstado unTipoDeEstado){
         this.id=Prenda.prendaId++;
+        this.estado=unEstado;
+        this.tipoDePrenda=unTipoDeEstado;
     }
 
-    public precio(){
+    public double precio(){
         return estado.modificacion(tipoDePrenda.precio());
     }
 }
@@ -103,7 +120,7 @@ class TipoDePrenda{
     int id;
     double precio;
     TipoDePrenda(double precio){
-        this.id=TipoDePrenda.prendaId++;
+        this.id=TipoDePrenda.tipoPrendaId++;
         this.precio=precio;
     }
     
@@ -116,42 +133,35 @@ class TipoDePrenda{
     }
 }
 
-interface Estado{
-    modificacion(double unPrecio);
-}
 
-class Nueva extends Estado{
-    public modificacion(double unPrecio){
+class Nueva implements Estado{
+    public double modificacion(double unPrecio){
         return unPrecio;
     }
 }
 
-class Promocion extends Estado{
+class Promocion implements Estado{
     double valor;
     
-    public modificacion(double unPrecio){
+    public double modificacion(double unPrecio){
         return unPrecio-valor;
     }
 }      
 
-class Liquidacion extends Estado{
-    public modificacion(double unPrecio){
+class Liquidacion implements Estado{
+  public double modificacion(double unPrecio){
         return unPrecio*0.5;
     }
 }
 
-interface TipoDePago{
-    recargo(Venta venta);
-}
-
-class Tarjeta extends TipoDePago{
+class Tarjeta implements TipoDePago{
     double coeficiente;
     public double recargo(Venta venta){
-        return venta.cuotas() * coeficiente + 0.01 * venta.valorTotalDePrendas();
+        return venta.getCuotas() * coeficiente + 0.01 * venta.valorTotalDePrendas();
     }
 }
 
-class Efectivo extends TipoDePago{
+class Efectivo implements TipoDePago{
     public double recargo(Venta venta){
         return 0;
     }
@@ -171,6 +181,9 @@ REQUERIMIENTOS NO FUNCIONALES: No encontra ninguno
 
 
 Aclaraciones:
+///El codigo tiene errores de compilacion ya que no conozco el lenguaje en su profundidad. Pero creo que se entiende en su
+mayoria. Tuve problemas con el tipo Date y como el funcionamiento con los statics en las clases.
+
 ///Los pagos en Efectivo se anotan con cuota=1.
 
 ///Descarte la codificacion de todos los getters y setters que no se hacen uso.
@@ -183,8 +196,6 @@ de la situacion asumi stock infinito.
 ///Considere Macowins como una clase, de esta forma se podria asumir que cada clase Macowins es un
 local de Macowins. Capaz, de momento no seria necesario pero a futuro probablemente seria conveniente
 si se implenta el sistema a una escala mayor.
-
-
 
 
 */
