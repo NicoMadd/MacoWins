@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.stream.Collector;
 
 
 class Macowins{
@@ -12,7 +13,7 @@ class Macowins{
     }
 
     private double gananciaDeVentas(List<Venta> unasVentas){
-        return ventas.map( venta -> venta.ganacia() ).sum();
+        return ventas.stream().map( venta -> venta.ganacia() ).collect(Collector.toList()).sum();
     }
 
     public double gananciaTotal(){
@@ -37,7 +38,7 @@ class Macowins{
     }
 
     private List<Ventas> filtrarVentasPorFecha(Date unDia){
-        return ventas.filter( venta -> venta.fecha == unDia);
+        return ventas.stream().filter( venta -> venta.fecha == unDia).collect(Collector.toList());
     }
 
 
@@ -81,7 +82,7 @@ class Venta{
         return this.valorTotalPrendas() + tipoDePago.recargo(this);
     }
     private double valorTotalDePrendas(){
-        return prendas.map(prenda -> prenda.precio()).sum();
+        return prendas.stream().map(prenda -> prenda.precio()).collect(Collector.toList()).sum();
     }
 
 class Prenda{
@@ -180,11 +181,9 @@ Aclaraciones:
 de la situacion asumi stock infinito.
 
 ///Considere Macowins como una clase, de esta forma se podria asumir que cada clase Macowins es un
-local de Macowins. Capaz de momento no seria necesario pero a futuro probablemente seria conveniente
+local de Macowins. Capaz, de momento no seria necesario pero a futuro probablemente seria conveniente
 si se implenta el sistema a una escala mayor.
 
-/// No tome en cuenta las transferencias bancarias ni las constaciones de los pagos en efectivo, no las
-considere como parte del sistema. Solamente las tome en cuenta para la ganancia neta de la empresa.
 
 
 
