@@ -188,10 +188,8 @@ mayoria. Tuve problemas con el tipo Date y como el funcionamiento con los static
 
 ///Descarte la codificacion de todos los getters y setters que no se hacen uso.
 
-///En la clase Macowins declare un metodo de hayStock que retorna siempre un true.
- Se da por entender que si hay stock, se valida la venta. Lo deje permanentemente 
- true ya que queria incluir esa consideracion al sistema y como no se tienen en cuenta dentro del contexto
-de la situacion asumi stock infinito.
+/// El metodo hayStock lo inclui para hacer mas razonable el contexto del codigo y validar la venta. Solo se asume
+la cantidad de stock y no el tipo de prenda en stock.
 
 ///Considere Macowins como una clase, de esta forma se podria asumir que cada clase Macowins es un
 local de Macowins. Capaz, de momento no seria necesario pero a futuro probablemente seria conveniente
